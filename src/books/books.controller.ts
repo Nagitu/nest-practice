@@ -2,15 +2,20 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus, HttpExce
 import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
-import { Borrow } from '@prisma/client';
+import { Book, Borrow } from '@prisma/client';
 
 @Controller('books')
 export class BooksController {
   constructor(private readonly booksService: BooksService) {}
 
   @Post()
-  create(@Body() createBookDto: CreateBookDto) {
-    return this.booksService.create(createBookDto);
+  async create( @Body() Data: CreateBookDto): Promise<Book> {
+    try{
+      const data = await this.booksService.create(Data);
+      return data
+    }catch(error){
+      throw new HttpException('Book not found or update failed', HttpStatus.BAD_REQUEST);
+    }
   }
 
   @Get()
@@ -26,8 +31,7 @@ export class BooksController {
   @Post(':bookCode/borrow')
   async borrowBook(
     @Param('bookCode') bookCode: string,
-    @Body('memberCode') memberCode: string,
-    data :{bookCode ,memberCode}
+    @Body('memberCode') memberCode: string
   ) {
     if (!bookCode || !memberCode) {
       throw new HttpException('Book code and member code are required', HttpStatus.BAD_REQUEST);
@@ -49,9 +53,17 @@ export class BooksController {
     return this.booksService.findOne(code);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateBookDto: UpdateBookDto) {
-    return this.booksService.update(+id, updateBookDto);
+  @Patch(':code')
+  async updateBook(
+    @Param('code') bookCode: string,
+    @Body() updateData: UpdateBookDto
+  ): Promise<Book> {
+    try {
+      const updatedBook = await this.booksService.update(bookCode, updateData);
+      return updatedBook;
+    } catch (error) {
+      throw new HttpException('Book not found or update failed', HttpStatus.BAD_REQUEST);
+    }
   }
 
   @Delete(':code')

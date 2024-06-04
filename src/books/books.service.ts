@@ -2,14 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 import { PrismaService } from '../prisma.service';
-import { Borrow, Prisma } from '@prisma/client';
+import { Book, Borrow, Prisma } from '@prisma/client';
 
 
 @Injectable()
 export class BooksService {
   constructor(private prisma: PrismaService) {}
-  create(createBookDto: CreateBookDto) {
-    return 'This action adds a new book';
+  create(data: Prisma.BookCreateInput): Promise<Book> {
+    return this.prisma.book.create({
+      data 
+    })
   }
 
   findAll() {
@@ -32,8 +34,11 @@ export class BooksService {
     })
   }
 
-  update(id: number, updateBookDto: UpdateBookDto) {
-    return `This action updates a #${id} book`;
+  update(bookCode: string, data: Prisma.BookUpdateInput): Promise<Book>  {
+    return this.prisma.book.update({
+      where: { code: bookCode },
+      data,
+    });
   }
 
   remove(code : string) {
