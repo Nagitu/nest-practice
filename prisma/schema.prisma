@@ -39,5 +39,5 @@ model Borrow {
   bookCode    String?
   book        Book?    @relation("BookBorrow", fields: [bookCode], references: [code])
   borrowedAt  DateTime @default(now())
-  returnAt    DateTime 
+  returnAt    DateTime?
 }
